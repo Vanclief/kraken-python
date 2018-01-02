@@ -28,7 +28,7 @@ def set_time_endpoint():
 
 def test_should_have_correct_url():
     k = Kraken()
-    assert k.api_base == 'https://api.kraken.com/'
+    assert k.api_base == 'https://api.kraken.com/0/'
 
 
 def test_should_have_api_key():
