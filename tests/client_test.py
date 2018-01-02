@@ -10,6 +10,22 @@ SYMBOLS_URL = 'https://api.kraken.com/0/public/AssetPairs'
 SYMBOL_DETAILS = 'https://api.kraken.com/0/public/AssetPairs'
 
 
+@httpretty.activate
+def set_time_endpoint():
+
+    mock_body = (
+            '{"error":[],"result":{"unixtime":1514919213,"rfc1123":"Tue,' +
+            '  2 Jan 18 18:53:33 +0000"}}'
+            )
+
+    mock_url = 'https://api.kraken.com/0/public/Time'
+    mock_status = 200
+
+    httpretty.register_uri(
+            httpretty.GET, mock_url, body=mock_body, status=mock_status
+            )
+
+
 def test_should_have_correct_url():
     k = Kraken()
     assert k.api_base == 'https://api.kraken.com/'
@@ -25,14 +41,19 @@ def test_should_have_secret_key():
     assert k.api_secret == '2976be9e189d'
 
 
+@set_time_endpoint
 @httpretty.activate
 def test_should_return_ticker():
 
     mock_symbol = 'btcusd'
     mock_body = (
-            '{"mid":"244.755","bid":"244.75","ask":"244.76",' +
-            '"last_price":"244.82","low":"244.2", "high":"248.19",' +
-            '"volume": "7842.11542563", "timestamp":"1395552658.339936691"}')
+            '{"error":[],"result":{"XXBTZUSD":{"a":["14429.00000","1",' +
+            '"1.000"],"b":["14427.80000","2","2.000"],"c":["14427.80000",' +
+            '"0.84801287"],"v":["2146.80696649","2726.69706158"],' +
+            '"p":["13728.68641","13705.40692"],"t":[13783,18274],' +
+            '"l":["13088.80000","13088.80000"],"h":["14427.80000"' +
+            ',"14427.80000"],"o":"13506.10000"}}}'
+    )
     mock_url = TICKER_URL + mock_symbol
     mock_status = 200
 
@@ -41,14 +62,14 @@ def test_should_return_ticker():
             )
 
     expected_response = {
-            "mid": 244.755,
-            "bid": 244.75,
-            "ask": 244.76,
-            "last_price": 244.82,
-            "low": 244.2,
-            "high": 248.19,
-            "volume": 7842.11542563,
-            "timestamp": 1395552658.339936691
+            "mid": 14428.4,
+            "bid": 14427.8,
+            "ask": 14429,
+            "last_price": 14427.8,
+            "low": 13088.8,
+            "high": 14427.8,
+            "volume": 2726.69706158,
+            "timestamp": 1514919213
             }
 
     response = client.ticker(mock_symbol)
@@ -60,9 +81,10 @@ def test_should_return_orderbook():
 
     mock_symbol = 'btcusd'
     mock_body = (
-            '{"bids":[{"price":"562.2601", "amount":"0.985", ' +
-            '"timestamp":"1395567556.0"}],"asks":[{"price":"563.001", ' +
-            '"amount":"0.3","timestamp":"1395532200.0"}]}')
+                '{"error":[],"result":{"XXBTZUSD":{"asks":[["14432.00000",' +
+                '"3.900",1514918034]],' +
+                '"bids":[["14430.00000","0.997",1514918017]]}}}'
+                )
     mock_url = ORDERS_URL + mock_symbol
     mock_status = 200
 
@@ -73,16 +95,16 @@ def test_should_return_orderbook():
     expected_response = {
             "bids": [
                 {
-                    "price": 562.2601,
-                    "amount": 0.985,
-                    "timestamp": 1395567556.0
+                    "price": 14432.0,
+                    "amount": 3.900,
+                    "timestamp": 1514918034.0
                     }
                 ],
             "asks": [
                 {
-                    "price": 563.001,
-                    "amount": 0.3,
-                    "timestamp": 1395532200.0
+                    "price": 14430.0,
+                    "amount": 0.997,
+                    "timestamp": 1514918017.0
                     }
                 ]
             }
@@ -96,8 +118,9 @@ def test_should_return_trades():
 
     mock_symbol = 'btcusd'
     mock_body = (
-            '[{ "timestamp":1444266681, "tid":11988919, "price":"244.8", ' +
-            '"amount":"0.03297384", "exchange":"bitfinex", "type":"sell"}]')
+            '{"error":[],"result":{"XXBTZUSD":[["13903.40000","0.02161302",' +
+            '1514914305.0079,"s","l",""]], "last":"1514918068359220939"}}'
+            )
     mock_url = TRADES_URL + mock_symbol
     mock_status = 200
 
@@ -106,8 +129,9 @@ def test_should_return_trades():
             )
 
     expected_response = [
-            {"timestamp": 1444266681, "tid": 11988919, "price": 244.8,
-                "amount": 0.03297384, "exchange": "bitfinex", "type": "sell"}
+            {   "timestamp": 1514914305.0079, "tid": 1514918068359220939,
+                "price": 13903.4, "amount": 0.02161402,
+                "exchange": "kraken", "type": "sell"}
             ]
 
     response = client.trades(mock_symbol)
@@ -118,7 +142,31 @@ def test_should_return_trades():
 @httpretty.activate
 def test_should_return_symbols():
 
-    mock_body = '["btcusd", "ltcusd", "ltcbtc"]'
+    mock_body = (
+                '{"error":[],"result":{"BCHEUR":{"altname":"BCHEUR",' +
+                '"aclass_base":"currency","base":"BCH",' +
+                '"aclass_quote":"currency","quote":"ZEUR","lot":"unit",' +
+                '"pair_decimals":1,"lot_decimals":8,"lot_multiplier":1,' +
+                '"leverage_buy":[],"leverage_sell":[],"fees":[[0,0.26],' +
+                '[50000,0.24],[100000,0.22],[250000,0.2],[500000,0.18],' +
+                '[1000000,0.16],[2500000,0.14],[5000000,0.12],[10000000,0.1]]' +
+                ',"fees_maker":[[0,0.16],[50000,0.14],[100000,0.12]' +
+                ',[250000,0.1],[500000,0.08],[1000000,0.06],[2500000,0.04]' +
+                ',[5000000,0.02],[10000000,0]],"fee_volume_currency":"ZUSD"' +
+                ',"margin_call":80,"margin_stop":40},' +
+                '"BCHUSD":{"altname":"BCHUSD","aclass_base":"currency",' +
+                '"base":"BCH","aclass_quote":"currency","quote":"ZUSD"' +
+                ',"lot":"unit","pair_decimals":1,"lot_decimals":8' +
+                ',"lot_multiplier":1,"leverage_buy":[],"leverage_sell":[]' +
+                ',"fees":[[0,0.26],[50000,0.24],[100000,0.22],[250000,0.2]' +
+                ',[500000,0.18],[1000000,0.16],[2500000,0.14],[5000000,0.12]' +
+                ',[10000000,0.1]],"fees_maker":[[0,0.16],[50000,0.14]' +
+                ',[100000,0.12],[250000,0.1],[500000,0.08],[1000000,0.06]' +
+                ',[2500000,0.04],[5000000,0.02],[10000000,0]]' +
+                ',"fee_volume_currency":"ZUSD","margin_call":80' +
+                ',"margin_stop":40}}'
+                )
+
     mock_url = SYMBOLS_URL
     mock_status = 200
 
@@ -126,7 +174,7 @@ def test_should_return_symbols():
             httpretty.GET, mock_url, body=mock_body, status=mock_status
             )
 
-    expected_response = ["btcusd", "ltcusd", "ltcbtc"]
+    expected_response = ["bcheur", "bchusd"]
 
     response = client.symbols()
     assert expected_response == response[1]
@@ -136,16 +184,30 @@ def test_should_return_symbols():
 def test_should_return_symbol_details():
 
     mock_body = (
-            '[{ "pair":"btcusd", "price_precision":5,' +
-            '"initial_margin":"30.0", "minimum_margin":"15.0",' +
-            '"maximum_order_size":"2000.0", "minimum_order_size":"0.01",' +
-            '"expiration":"NA" },{ "pair":"ltcusd", "price_precision":5,' +
-            '"initial_margin":"30.0", "minimum_margin":"15.0",' +
-            '"maximum_order_size":"5000.0", "minimum_order_size":"0.1", ' +
-            '"expiration":"NA" },{ "pair":"ltcbtc", "price_precision":5,' +
-            '"initial_margin":"30.0", "minimum_margin":"15.0",' +
-            '"maximum_order_size":"5000.0", "minimum_order_size":"0.1",' +
-            '"expiration":"NA"}]')
+                '{"error":[],"result":{"BCHEUR":{"altname":"BCHEUR",' +
+                '"aclass_base":"currency","base":"BCH",' +
+                '"aclass_quote":"currency","quote":"ZEUR","lot":"unit",' +
+                '"pair_decimals":1,"lot_decimals":8,"lot_multiplier":1,' +
+                '"leverage_buy":[],"leverage_sell":[],"fees":[[0,0.26],' +
+                '[50000,0.24],[100000,0.22],[250000,0.2],[500000,0.18],' +
+                '[1000000,0.16],[2500000,0.14],[5000000,0.12],[10000000,0.1]]' +
+                ',"fees_maker":[[0,0.16],[50000,0.14],[100000,0.12]' +
+                ',[250000,0.1],[500000,0.08],[1000000,0.06],[2500000,0.04]' +
+                ',[5000000,0.02],[10000000,0]],"fee_volume_currency":"ZUSD"' +
+                ',"margin_call":80,"margin_stop":40},' +
+                '"BCHUSD":{"altname":"BCHUSD","aclass_base":"currency",' +
+                '"base":"BCH","aclass_quote":"currency","quote":"ZUSD"' +
+                ',"lot":"unit","pair_decimals":1,"lot_decimals":8' +
+                ',"lot_multiplier":1,"leverage_buy":[],"leverage_sell":[]' +
+                ',"fees":[[0,0.26],[50000,0.24],[100000,0.22],[250000,0.2]' +
+                ',[500000,0.18],[1000000,0.16],[2500000,0.14],[5000000,0.12]' +
+                ',[10000000,0.1]],"fees_maker":[[0,0.16],[50000,0.14]' +
+                ',[100000,0.12],[250000,0.1],[500000,0.08],[1000000,0.06]' +
+                ',[2500000,0.04],[5000000,0.02],[10000000,0]]' +
+                ',"fee_volume_currency":"ZUSD","margin_call":80' +
+                ',"margin_stop":40}}'
+                )
+
     mock_url = SYMBOL_DETAILS
     mock_status = 200
 
@@ -155,21 +217,15 @@ def test_should_return_symbol_details():
 
     expected_response = [
             {
-                "pair": "btcusd", "price_precision": 5,
-                "initial_margin": 30.0, "minimum_margin": 15.0,
-                "maximum_order_size": 2000.0, "minimum_order_size": 0.01,
-                "expiration": "NA"
-                },
-            {
-                "pair": "ltcusd", "price_precision": 5,
-                "initial_margin": 30.0, "minimum_margin": 15.0,
-                "maximum_order_size": 5000.0, "minimum_order_size": 0.1,
+                "pair": "bcheur", "price_precision": 8,
+                "initial_margin": 80.0, "minimum_margin": 40.0,
+                "maximum_order_size": 0.0, "minimum_order_size": 0.0,
                 "expiration": "NA"
                 },
             {
                 "pair": "ltcbtc", "price_precision": 5,
-                "initial_margin": 30.0, "minimum_margin": 15.0,
-                "maximum_order_size": 5000.0, "minimum_order_size": 0.1,
+                "initial_margin": 80.0, "minimum_margin": 40.0,
+                "maximum_order_size": 0.0, "minimum_order_size": 0.0,
                 "expiration": "NA"
                 }
             ]
