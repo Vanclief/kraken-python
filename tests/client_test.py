@@ -10,7 +10,6 @@ SYMBOLS_URL = 'https://api.kraken.com/0/public/AssetPairs'
 SYMBOL_DETAILS = 'https://api.kraken.com/0/public/AssetPairs'
 
 
-@httpretty.activate
 def set_time_endpoint():
 
     mock_body = (
@@ -26,8 +25,8 @@ def set_time_endpoint():
             )
 
 
-def test_should_have_correct_url():
-    k = Kraken()
+    def test_should_have_correct_url():
+        k = Kraken()
     assert k.api_base == 'https://api.kraken.com/0/'
 
 
@@ -41,9 +40,10 @@ def test_should_have_secret_key():
     assert k.api_secret == '2976be9e189d'
 
 
-@set_time_endpoint
 @httpretty.activate
 def test_should_return_ticker():
+
+    set_time_endpoint()
 
     mock_symbol = 'btcusd'
     mock_body = (
@@ -53,8 +53,8 @@ def test_should_return_ticker():
             '"p":["13728.68641","13705.40692"],"t":[13783,18274],' +
             '"l":["13088.80000","13088.80000"],"h":["14427.80000"' +
             ',"14427.80000"],"o":"13506.10000"}}}'
-    )
-    mock_url = TICKER_URL + mock_symbol
+            )
+    mock_url = TICKER_URL + '?pair=XBTUSD'
     mock_status = 200
 
     httpretty.register_uri(
@@ -81,11 +81,11 @@ def test_should_return_orderbook():
 
     mock_symbol = 'btcusd'
     mock_body = (
-                '{"error":[],"result":{"XXBTZUSD":{"asks":[["14432.00000",' +
-                '"3.900",1514918034]],' +
-                '"bids":[["14430.00000","0.997",1514918017]]}}}'
-                )
-    mock_url = ORDERS_URL + mock_symbol
+            '{"error":[],"result":{"XXBTZUSD":{"asks":[["14432.00000",' +
+            '"3.900",1514918034]],' +
+            '"bids":[["14430.00000","0.997",1514918017]]}}}'
+            )
+    mock_url = ORDERS_URL + '?pair=XBTUSD'
     mock_status = 200
 
     httpretty.register_uri(
@@ -121,7 +121,7 @@ def test_should_return_trades():
             '{"error":[],"result":{"XXBTZUSD":[["13903.40000","0.02161302",' +
             '1514914305.0079,"s","l",""]], "last":"1514918068359220939"}}'
             )
-    mock_url = TRADES_URL + mock_symbol
+    mock_url = TRADES_URL + '?pair=XBTUSD'
     mock_status = 200
 
     httpretty.register_uri(
@@ -143,29 +143,29 @@ def test_should_return_trades():
 def test_should_return_symbols():
 
     mock_body = (
-                '{"error":[],"result":{"BCHEUR":{"altname":"BCHEUR",' +
-                '"aclass_base":"currency","base":"BCH",' +
-                '"aclass_quote":"currency","quote":"ZEUR","lot":"unit",' +
-                '"pair_decimals":1,"lot_decimals":8,"lot_multiplier":1,' +
-                '"leverage_buy":[],"leverage_sell":[],"fees":[[0,0.26],' +
-                '[50000,0.24],[100000,0.22],[250000,0.2],[500000,0.18],' +
-                '[1000000,0.16],[2500000,0.14],[5000000,0.12],[10000000,0.1]]' +
-                ',"fees_maker":[[0,0.16],[50000,0.14],[100000,0.12]' +
-                ',[250000,0.1],[500000,0.08],[1000000,0.06],[2500000,0.04]' +
-                ',[5000000,0.02],[10000000,0]],"fee_volume_currency":"ZUSD"' +
-                ',"margin_call":80,"margin_stop":40},' +
-                '"BCHUSD":{"altname":"BCHUSD","aclass_base":"currency",' +
-                '"base":"BCH","aclass_quote":"currency","quote":"ZUSD"' +
-                ',"lot":"unit","pair_decimals":1,"lot_decimals":8' +
-                ',"lot_multiplier":1,"leverage_buy":[],"leverage_sell":[]' +
-                ',"fees":[[0,0.26],[50000,0.24],[100000,0.22],[250000,0.2]' +
-                ',[500000,0.18],[1000000,0.16],[2500000,0.14],[5000000,0.12]' +
-                ',[10000000,0.1]],"fees_maker":[[0,0.16],[50000,0.14]' +
-                ',[100000,0.12],[250000,0.1],[500000,0.08],[1000000,0.06]' +
-                ',[2500000,0.04],[5000000,0.02],[10000000,0]]' +
-                ',"fee_volume_currency":"ZUSD","margin_call":80' +
-                ',"margin_stop":40}}'
-                )
+            '{"error":[],"result":{"BCHEUR":{"altname":"BCHEUR",' +
+            '"aclass_base":"currency","base":"BCH",' +
+            '"aclass_quote":"currency","quote":"ZEUR","lot":"unit",' +
+            '"pair_decimals":1,"lot_decimals":8,"lot_multiplier":1,' +
+            '"leverage_buy":[],"leverage_sell":[],"fees":[[0,0.26],' +
+            '[50000,0.24],[100000,0.22],[250000,0.2],[500000,0.18],' +
+            '[1000000,0.16],[2500000,0.14],[5000000,0.12],[10000000,0.1]]' +
+            ',"fees_maker":[[0,0.16],[50000,0.14],[100000,0.12]' +
+            ',[250000,0.1],[500000,0.08],[1000000,0.06],[2500000,0.04]' +
+            ',[5000000,0.02],[10000000,0]],"fee_volume_currency":"ZUSD"' +
+            ',"margin_call":80,"margin_stop":40},' +
+            '"BCHUSD":{"altname":"BCHUSD","aclass_base":"currency",' +
+            '"base":"BCH","aclass_quote":"currency","quote":"ZUSD"' +
+            ',"lot":"unit","pair_decimals":1,"lot_decimals":8' +
+            ',"lot_multiplier":1,"leverage_buy":[],"leverage_sell":[]' +
+            ',"fees":[[0,0.26],[50000,0.24],[100000,0.22],[250000,0.2]' +
+            ',[500000,0.18],[1000000,0.16],[2500000,0.14],[5000000,0.12]' +
+            ',[10000000,0.1]],"fees_maker":[[0,0.16],[50000,0.14]' +
+            ',[100000,0.12],[250000,0.1],[500000,0.08],[1000000,0.06]' +
+            ',[2500000,0.04],[5000000,0.02],[10000000,0]]' +
+            ',"fee_volume_currency":"ZUSD","margin_call":80' +
+            ',"margin_stop":40}}}'
+            )
 
     mock_url = SYMBOLS_URL
     mock_status = 200
@@ -184,29 +184,29 @@ def test_should_return_symbols():
 def test_should_return_symbol_details():
 
     mock_body = (
-                '{"error":[],"result":{"BCHEUR":{"altname":"BCHEUR",' +
-                '"aclass_base":"currency","base":"BCH",' +
-                '"aclass_quote":"currency","quote":"ZEUR","lot":"unit",' +
-                '"pair_decimals":1,"lot_decimals":8,"lot_multiplier":1,' +
-                '"leverage_buy":[],"leverage_sell":[],"fees":[[0,0.26],' +
-                '[50000,0.24],[100000,0.22],[250000,0.2],[500000,0.18],' +
-                '[1000000,0.16],[2500000,0.14],[5000000,0.12],[10000000,0.1]]' +
-                ',"fees_maker":[[0,0.16],[50000,0.14],[100000,0.12]' +
-                ',[250000,0.1],[500000,0.08],[1000000,0.06],[2500000,0.04]' +
-                ',[5000000,0.02],[10000000,0]],"fee_volume_currency":"ZUSD"' +
-                ',"margin_call":80,"margin_stop":40},' +
-                '"BCHUSD":{"altname":"BCHUSD","aclass_base":"currency",' +
-                '"base":"BCH","aclass_quote":"currency","quote":"ZUSD"' +
-                ',"lot":"unit","pair_decimals":1,"lot_decimals":8' +
-                ',"lot_multiplier":1,"leverage_buy":[],"leverage_sell":[]' +
-                ',"fees":[[0,0.26],[50000,0.24],[100000,0.22],[250000,0.2]' +
-                ',[500000,0.18],[1000000,0.16],[2500000,0.14],[5000000,0.12]' +
-                ',[10000000,0.1]],"fees_maker":[[0,0.16],[50000,0.14]' +
-                ',[100000,0.12],[250000,0.1],[500000,0.08],[1000000,0.06]' +
-                ',[2500000,0.04],[5000000,0.02],[10000000,0]]' +
-                ',"fee_volume_currency":"ZUSD","margin_call":80' +
-                ',"margin_stop":40}}'
-                )
+        '{"error":[],"result":{"BCHEUR":{"altname":"BCHEUR",' +
+        '"aclass_base":"currency","base":"BCH",' +
+        '"aclass_quote":"currency","quote":"ZEUR","lot":"unit",' +
+        '"pair_decimals":1,"lot_decimals":8,"lot_multiplier":1,' +
+        '"leverage_buy":[],"leverage_sell":[],"fees":[[0,0.26],' +
+        '[50000,0.24],[100000,0.22],[250000,0.2],[500000,0.18],' +
+        '[1000000,0.16],[2500000,0.14],[5000000,0.12],[10000000,0.1]]' +
+        ',"fees_maker":[[0,0.16],[50000,0.14],[100000,0.12]' +
+        ',[250000,0.1],[500000,0.08],[1000000,0.06],[2500000,0.04]' +
+        ',[5000000,0.02],[10000000,0]],"fee_volume_currency":"ZUSD"' +
+        ',"margin_call":80,"margin_stop":40},' +
+        '"BCHUSD":{"altname":"BCHUSD","aclass_base":"currency",' +
+        '"base":"BCH","aclass_quote":"currency","quote":"ZUSD"' +
+        ',"lot":"unit","pair_decimals":1,"lot_decimals":8' +
+        ',"lot_multiplier":1,"leverage_buy":[],"leverage_sell":[]' +
+        ',"fees":[[0,0.26],[50000,0.24],[100000,0.22],[250000,0.2]' +
+        ',[500000,0.18],[1000000,0.16],[2500000,0.14],[5000000,0.12]' +
+        ',[10000000,0.1]],"fees_maker":[[0,0.16],[50000,0.14]' +
+        ',[100000,0.12],[250000,0.1],[500000,0.08],[1000000,0.06]' +
+        ',[2500000,0.04],[5000000,0.02],[10000000,0]]' +
+        ',"fee_volume_currency":"ZUSD","margin_call":80' +
+        ',"margin_stop":40}}}'
+            )
 
     mock_url = SYMBOL_DETAILS
     mock_status = 200
@@ -218,13 +218,11 @@ def test_should_return_symbol_details():
     expected_response = [
             {
                 "pair": "bcheur", "price_precision": 8,
-                "initial_margin": 80.0, "minimum_margin": 40.0,
                 "maximum_order_size": 0.0, "minimum_order_size": 0.0,
                 "expiration": "NA"
                 },
             {
-                "pair": "ltcbtc", "price_precision": 5,
-                "initial_margin": 80.0, "minimum_margin": 40.0,
+                "pair": "bchusd", "price_precision": 8,
                 "maximum_order_size": 0.0, "minimum_order_size": 0.0,
                 "expiration": "NA"
                 }

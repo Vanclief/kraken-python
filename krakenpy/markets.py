@@ -51,13 +51,35 @@ class Market(object):
 
     def get_symbols(self):
         endpoint = SYMBOLS_URL
-        return self.r.get(endpoint)
+        status, response = self.r.get(endpoint)
+
+        if status != 200:
+            return status, response['error']
+
+        parsed_response = []
+
+        for symbol in response['result']:
+            parsed_response.append(symbol.lower())
+
+        return status, parsed_response
 
     def get_symbol_details(self):
         endpoint = SYMBOL_DETAILS
         status, response = self.r.get(endpoint)
 
         if status != 200:
-            return status, response
+            return status, response['error']
 
-        return status, helpers.list_dict_to_float(response)
+        parsed_response = []
+
+        for symbol in response['result']:
+            p = {}
+            p['pair'] = symbol.lower()
+            p['price_precision'] = 8
+            p['maximum_order_size'] = float(0)
+            p['minimum_order_size'] = float(0)
+            p['expiration'] = "NA"
+            parsed_response.append(p)
+
+
+        return status, parsed_response
