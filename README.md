@@ -38,8 +38,8 @@ k.ticker('btcusd')
 
 ## TODO
 
-- [ ]  Add tests
-- [ ]  Add public endpoints
+- [X]  Add tests
+- [X]  Add public endpoints
 - [X]  Add requirements, setup, etc.
 - [ ]  Add private endpoints
 - [ ]  Unify interface for trading endpoints
