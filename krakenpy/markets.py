@@ -32,12 +32,23 @@ class Market(object):
         if status != 200:
             return status, response['error']
 
-        for order_type in response.keys():
-            for order in response[order_type]:
-                for key, value in order.items():
-                    order[key] = float(value)
+        parsed_response = {'asks': [], 'bids': []}
 
-        return status, response
+        for key, orders in response['result'].items():
+            for key, values in orders.items():
+                for value in values:
+
+                    ask = {}
+                    ask['price'] = float(value[0])
+                    ask['amount'] = float(value[1])
+                    ask['timestamp'] = float(value[2])
+
+                    if key == 'asks':
+                        parsed_response['asks'].append(ask)
+                    elif key == 'bids':
+                        parsed_response['bids'].append(ask)
+
+        return status, parsed_response
 
     def get_trades(self, symbol):
         endpoint = TRADES_URL + helpers.symbol_to_request(symbol)

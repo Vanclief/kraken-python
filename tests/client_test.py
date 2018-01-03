@@ -25,8 +25,8 @@ def set_time_endpoint():
             )
 
 
-    def test_should_have_correct_url():
-        k = Kraken()
+def test_should_have_correct_url():
+    k = Kraken()
     assert k.api_base == 'https://api.kraken.com/0/'
 
 
@@ -93,14 +93,14 @@ def test_should_return_orderbook():
             )
 
     expected_response = {
-            "bids": [
+            "asks": [
                 {
                     "price": 14432.0,
                     "amount": 3.900,
                     "timestamp": 1514918034.0
                     }
                 ],
-            "asks": [
+            "bids": [
                 {
                     "price": 14430.0,
                     "amount": 0.997,
