@@ -21,3 +21,20 @@ def list_dict_to_float(l):
         d = dict_to_float(d)
 
     return l
+
+def symbol_to_request(s):
+    """
+    Converts from btcusd to ?pair=XBTUSD
+    """
+    if s[:3] == 'btc':
+        s = 'XBT' + s[3:].upper()
+    return "?pair={0}".format(s)
+
+def stringify_trade_type(s):
+    """
+    S -> Sell, B -> Buy
+    """
+    if s == 's':
+        return 'sell'
+
+    return 'buy'

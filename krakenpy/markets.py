@@ -1,9 +1,9 @@
 from krakenpy.requester import Requester
 import krakenpy.helpers as helpers
 
-TICKER_URL = "public/Ticker/"
-ORDERS_URL = "public/Depth/"
-TRADES_URL = "public/Trades/"
+TICKER_URL = "public/Ticker"
+ORDERS_URL = "public/Depth"
+TRADES_URL = "public/Trades"
 SYMBOLS_URL = "public/AssetPairs"
 SYMBOL_DETAILS = "public/AssetPairs"
 
@@ -15,22 +15,22 @@ class Market(object):
 
     def get_ticker(self, symbol):
 
-        endpoint = TICKER_URL + symbol
+        endpoint = TICKER_URL + helpers.symbol_to_request(symbol)
         status, response = self.r.get(endpoint)
 
         if status != 200:
-            return status, response
+            return status, response['error']
 
         return status, helpers.dict_to_float(response)
 
 
     def get_orderbook(self, symbol):
 
-        endpoint = ORDERS_URL + symbol
+        endpoint = ORDERS_URL + helpers.symbol_to_request(symbol)
         status, response = self.r.get(endpoint)
 
         if status != 200:
-            return status, response
+            return status, response['error']
 
         for order_type in response.keys():
             for order in response[order_type]:
@@ -40,13 +40,31 @@ class Market(object):
         return status, response
 
     def get_trades(self, symbol):
-        endpoint = TRADES_URL + symbol
+        endpoint = TRADES_URL + helpers.symbol_to_request(symbol)
         status, response = self.r.get(endpoint)
 
         if status != 200:
-            return status, response
+            return status, response['error']
 
-        return status, helpers.list_dict_to_float(response)
+        parsed_response = []
+
+        tid = response['result']['last']
+
+        for key, values in response['result'].items():
+            if key != 'last':
+                for value in values:
+                    print(key, value)
+                    p = {}
+                    p['timestamp'] = float(value[2])
+                    p['tid'] = int(tid)
+                    p['price'] = float(value[0])
+                    p['amount'] = float(value[1])
+                    p['exchange'] = 'kraken'
+                    p['type'] = helpers.stringify_trade_type(value[3])
+
+                    parsed_response.append(p)
+
+        return status, parsed_response
 
 
     def get_symbols(self):

@@ -130,7 +130,7 @@ def test_should_return_trades():
 
     expected_response = [
             {   "timestamp": 1514914305.0079, "tid": 1514918068359220939,
-                "price": 13903.4, "amount": 0.02161402,
+                "price": 13903.4, "amount": 0.02161302,
                 "exchange": "kraken", "type": "sell"}
             ]
 
