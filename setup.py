@@ -11,7 +11,7 @@ with open('LICENSE') as f:
 
 setup(
     name='krakenpy',
-    version='0.1.0',
+    version='0.1.1',
     description='Unofficial Python3 library for the Kraken API',
     long_description=readme,
     author='Franco Valencia',
