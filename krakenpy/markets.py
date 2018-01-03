@@ -1,6 +1,7 @@
 from krakenpy.requester import Requester
 import krakenpy.helpers as helpers
 
+TIME_URL = "public/Time"
 TICKER_URL = "public/Ticker"
 ORDERS_URL = "public/Depth"
 TRADES_URL = "public/Trades"
@@ -13,15 +14,47 @@ class Market(object):
     def __init__(self, api_base):
         self.r = Requester(api_base)
 
+    def get_server_time(self):
+        endpoint = TIME_URL
+        status, response = self.r.get(endpoint)
+
+        if status != 200:
+            return status, response['error']
+
+        return status, response['result']
+
     def get_ticker(self, symbol):
 
+        # We need to first manually get the timestamp, since
+        # Kraken doesn't include it ...
+        status, response = self.get_server_time()
+
+        if status != 200:
+            return status, response['error']
+
+        timestamp = response['unixtime']
+
+        # Now we can make the proper call
         endpoint = TICKER_URL + helpers.symbol_to_request(symbol)
         status, response = self.r.get(endpoint)
 
         if status != 200:
             return status, response['error']
 
-        return status, helpers.dict_to_float(response)
+        parsed_response = {}
+
+        for key, value in response['result'].items():
+            parsed_response['bid'] = float(value['b'][0])
+            parsed_response['ask'] = float(value['a'][0])
+            parsed_response['mid'] = ((float(value['a'][0]) +
+                    float(value['b'][0])) / 2)
+            parsed_response['last_price'] = float(value['c'][0])
+            parsed_response['low'] = float(value['l'][0])
+            parsed_response['high'] = float(value['h'][0])
+            parsed_response['volume'] = float(value['v'][1])
+            parsed_response['timestamp'] = float(timestamp)
+
+        return status, parsed_response
 
 
     def get_orderbook(self, symbol):

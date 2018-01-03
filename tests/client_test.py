@@ -64,7 +64,7 @@ def test_should_return_ticker():
     expected_response = {
             "mid": 14428.4,
             "bid": 14427.8,
-            "ask": 14429,
+            "ask": 14429.0,
             "last_price": 14427.8,
             "low": 13088.8,
             "high": 14427.8,
