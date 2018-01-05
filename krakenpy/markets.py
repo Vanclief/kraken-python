@@ -97,7 +97,6 @@ class Market(object):
         for key, values in response['result'].items():
             if key != 'last':
                 for value in values:
-                    print(key, value)
                     p = {}
                     p['timestamp'] = float(value[2])
                     p['tid'] = int(tid)
@@ -118,12 +117,14 @@ class Market(object):
         if status != 200:
             return status, response['error']
 
-        parsed_response = []
+        symbols = []
 
-        for symbol in response['result']:
-            parsed_response.append(symbol.lower())
+        for key, value in response['result'].items():
 
-        return status, parsed_response
+            symbol = value['altname'].lower()
+            symbols.append(symbol)
+
+        return status, symbols
 
     def get_symbol_details(self):
         endpoint = SYMBOL_DETAILS
@@ -132,16 +133,15 @@ class Market(object):
         if status != 200:
             return status, response['error']
 
-        parsed_response = []
+        symbols = []
 
-        for symbol in response['result']:
-            p = {}
-            p['pair'] = symbol.lower()
-            p['price_precision'] = 8
-            p['maximum_order_size'] = float(0)
-            p['minimum_order_size'] = float(0)
-            p['expiration'] = "NA"
-            parsed_response.append(p)
+        for key, value in response['result'].items():
+            symbol = {}
+            symbol['pair'] = value['altname'].lower()
+            symbol['price_precision'] = 8
+            symbol['maximum_order_size'] = float(0)
+            symbol['minimum_order_size'] = float(0)
+            symbol['expiration'] = "NA"
+            symbols.append(symbol)
 
-
-        return status, parsed_response
+        return status, symbols
